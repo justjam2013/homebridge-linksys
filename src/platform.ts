@@ -15,9 +15,6 @@ import { LinksysConfig } from './linksys/models/config.js';
 import { LinksysAccessory } from './accessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
-let hap: HAP;
-let Accessory: typeof PlatformAccessory;
-
 export class LinksysPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
   private readonly api: API;
@@ -55,17 +52,17 @@ export class LinksysPlatform implements DynamicPlatformPlugin {
       this.log.info(`${accessory.displayName} identified!`);
     });
 
-    const linksysAccessory = new LinksysAccessory(accessory, this.config, this.log, hap);
+    const linksysAccessory = new LinksysAccessory(accessory, this.config, this.log, this.api.hap);
 
-    const routerService = linksysAccessory.createService(hap.Service.WiFiRouter);
+    const routerService = linksysAccessory.createService(this.api.hap.Service.WiFiRouter);
     routerService
-      .getCharacteristic(hap.Characteristic.ManagedNetworkEnable)
+      .getCharacteristic(this.api.hap.Characteristic.ManagedNetworkEnable)
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicSetCallback) => {
         callback(null, 1);
       });
 
     routerService
-      .getCharacteristic(hap.Characteristic.RouterStatus)
+      .getCharacteristic(this.api.hap.Characteristic.RouterStatus)
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicSetCallback) => {
         callback(null, 0);
       });
@@ -74,6 +71,8 @@ export class LinksysPlatform implements DynamicPlatformPlugin {
   }
 
   async didFinishLaunching(): Promise<void> {
+    let Accessory: typeof PlatformAccessory;
+
     const api = new LinksysAPI(this.routerIP, this.password);
     const validated = (await api.sendRequest('core/CheckAdminPassword')).result === 'OK';
 
@@ -83,15 +82,15 @@ export class LinksysPlatform implements DynamicPlatformPlugin {
     const info = (await api.sendRequest('core/GetDeviceInfo')).output;
     const wifi = (await api.sendRequest('router/GetLANSettings')).output;
     const ssid = wifi.hostName;
-    const uuid = hap.uuid.generate(info.serialNumber);
+    const uuid = this.api.hap.uuid.generate(info.serialNumber);
     const accessory = new Accessory(ssid, uuid);
 
-    const accessoryInformation = accessory.getService(hap.Service.AccessoryInformation);
+    const accessoryInformation = accessory.getService(this.api.hap.Service.AccessoryInformation);
     if (accessoryInformation) {
-      accessoryInformation.setCharacteristic(hap.Characteristic.Manufacturer, info.manufacturer);
-      accessoryInformation.setCharacteristic(hap.Characteristic.Model, info.modelNumber);
-      accessoryInformation.setCharacteristic(hap.Characteristic.SerialNumber, info.serialNumber);
-      accessoryInformation.setCharacteristic(hap.Characteristic.FirmwareRevision, info.firmwareVersion);
+      accessoryInformation.setCharacteristic(this.api.hap.Characteristic.Manufacturer, info.manufacturer);
+      accessoryInformation.setCharacteristic(this.api.hap.Characteristic.Model, info.modelNumber);
+      accessoryInformation.setCharacteristic(this.api.hap.Characteristic.SerialNumber, info.serialNumber);
+      accessoryInformation.setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, info.firmwareVersion);
     }
 
     if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
