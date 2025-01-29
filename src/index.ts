@@ -43,7 +43,7 @@ class LinksysPlatform implements DynamicPlatformPlugin {
     this.password = this.config.password;
 
     if (!this.password) {
-      this.log.error("Please add your router's password to the config.json.");
+      this.log.error('Please add your router\'s password to the config.json.');
       return;
     }
 
