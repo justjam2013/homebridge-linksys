@@ -24,10 +24,10 @@ export class LinksysAccessory {
       existingService ||
       (name
         ? this.accessory.addService(
-            serviceType,
-            `${this.accessory.displayName} ${name}`,
-            `${this.accessory.displayName} ${name}`,
-          )
+          serviceType,
+          `${this.accessory.displayName} ${name}`,
+          `${this.accessory.displayName} ${name}`,
+        )
         : this.accessory.addService(serviceType, this.accessory.displayName));
     return service;
   }
