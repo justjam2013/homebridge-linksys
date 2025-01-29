@@ -14,6 +14,8 @@ import { LinksysConfig } from './linksys/models/config.js';
 import { LinksysAccessory } from './accessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
+//type Accessory = typeof PlatformAccessory;
+
 export class LinksysPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
   private readonly api: API;
@@ -70,7 +72,6 @@ export class LinksysPlatform implements DynamicPlatformPlugin {
   }
 
   async didFinishLaunching(): Promise<void> {
-    let Accessory: typeof PlatformAccessory;
 
     const api = new LinksysAPI(this.routerIP, this.password);
     const validated = (await api.sendRequest('core/CheckAdminPassword')).result === 'OK';
@@ -82,7 +83,7 @@ export class LinksysPlatform implements DynamicPlatformPlugin {
     const wifi = (await api.sendRequest('router/GetLANSettings')).output;
     const ssid = wifi.hostName;
     const uuid = this.api.hap.uuid.generate(info.serialNumber);
-    const accessory = new Accessory(ssid, uuid);
+    const accessory = new PlatformAccessory(ssid, uuid);
 
     const accessoryInformation = accessory.getService(this.api.hap.Service.AccessoryInformation);
     if (accessoryInformation) {
