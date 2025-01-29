@@ -4,7 +4,6 @@ import {
   CharacteristicEventTypes,
   CharacteristicSetCallback,
   DynamicPlatformPlugin,
-  HAP,
   Logging,
   PlatformAccessory,
   PlatformAccessoryEvent,
